@@ -5,42 +5,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-public class CorsConfig implements WebMvcConfigurer {
+public class CorsConfig {
 
     @Value("${frontend.url:http://localhost:5173}")
     private String frontendUrl;
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins(
-                        frontendUrl,
-                        "https://life-4oh3onw47-powerhouse14.vercel.app",
-                        "http://localhost:5173",
-                        "http://localhost:3000",
-                        "http://127.0.0.1:5173")
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
-    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of(
+        configuration.setAllowedOriginPatterns(List.of(
                 frontendUrl,
-                "https://life-4oh3onw47-powerhouse14.vercel.app",
+                "https://*.vercel.app",
                 "http://localhost:5173",
                 "http://localhost:3000",
                 "http://127.0.0.1:5173"));
@@ -59,10 +41,6 @@ public class CorsConfig implements WebMvcConfigurer {
 
         configuration.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**", configuration);
-
-        return source;
+        return request -> configuration;
     }
 }
