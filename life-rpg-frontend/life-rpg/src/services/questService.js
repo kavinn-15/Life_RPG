@@ -125,13 +125,54 @@ export function saveStoredQuests(quests) {
 // GET /api/quests
 export async function getQuests() {
   const localList = getStoredQuests();
+  const localMap = new Map(localList.map((q) => [q.id, q]));
+
   try {
     const res = await api.get('/quests');
-    if (res) {
-      if (Array.isArray(res) && res.length > 0) return res;
-      if (res.allQuests && Array.isArray(res.allQuests) && res.allQuests.length > 0) {
-        return res.allQuests;
+    let remoteList = null;
+    if (Array.isArray(res) && res.length > 0) {
+      remoteList = res;
+    } else if (res?.allQuests && Array.isArray(res.allQuests) && res.allQuests.length > 0) {
+      remoteList = res.allQuests;
+    }
+
+    if (remoteList) {
+      const merged = remoteList.map((rq) => {
+        const local = localMap.get(rq.id);
+        const isLocallyCompleted =
+          local?.status === 'COMPLETED' ||
+          local?.completed === true ||
+          local?.done === true ||
+          (local?.progressPct ?? local?.progress ?? 0) >= 100;
+        const isRemotelyCompleted =
+          rq.status === 'COMPLETED' ||
+          rq.completed === true ||
+          rq.done === true ||
+          (rq.progress ?? rq.progressPct ?? 0) >= 100;
+        const isDone = isLocallyCompleted || isRemotelyCompleted;
+
+        return {
+          ...local,
+          ...rq,
+          status: isDone ? 'COMPLETED' : (rq.status || local?.status || 'ACTIVE'),
+          completed: isDone,
+          done: isDone,
+          progress: isDone ? 100 : (rq.progress ?? local?.progress ?? 0),
+          progressPct: isDone ? 100 : (rq.progressPct ?? local?.progressPct ?? 0),
+          subtasks: isDone
+            ? (rq.milestones || rq.subtasks || local?.subtasks || []).map((s) => ({ ...s, done: true, completed: true }))
+            : (rq.milestones || rq.subtasks || local?.subtasks || []),
+        };
+      });
+
+      for (const [id, localQuest] of localMap.entries()) {
+        if (!merged.some((m) => m.id === id)) {
+          merged.push(localQuest);
+        }
       }
+
+      saveStoredQuests(merged);
+      return merged;
     }
   } catch (err) {
     console.warn('API getQuests failed, using stored local data:', err);
