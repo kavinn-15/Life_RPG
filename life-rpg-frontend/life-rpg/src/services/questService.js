@@ -365,6 +365,7 @@ export async function completeQuest(id) {
         progressLabel: subtasks.length ? `100% (${subtasks.length}/${subtasks.length})` : '100%',
         status: 'COMPLETED',
         completed: true,
+        completedAt: new Date().toISOString(),
       };
     }
     return q;
