@@ -114,6 +114,9 @@ export function getStoredQuests() {
 export function saveStoredQuests(quests) {
   try {
     localStorage.setItem(QUESTS_STORAGE_KEY, JSON.stringify(quests));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('liferpg_quests_updated', { detail: quests }));
+    }
   } catch (e) {
     console.warn('Could not save quests to localStorage:', e);
   }

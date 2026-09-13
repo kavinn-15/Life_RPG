@@ -390,7 +390,51 @@ function AdventureProgressPanel({ progress = 0, cycle = 'Cycle 1', milestones = 
    ACTIVE ADVENTURE QUEST (RIGHT COLUMN CARD 3 - CLEAN)
    ================================================================ */
 
-function ActiveAdventureQuest({ quest, onContinue, onViewDetails }) {
+function ActiveAdventureQuest({ quest, onContinue, onViewDetails, onForge }) {
+  if (!quest) {
+    return (
+      <section>
+        <div className="mb-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[20px] text-primary">
+              explore
+            </span>
+            <h2 className="text-[14px] font-extrabold text-[#17173e]">
+              Active Adventure Quest
+            </h2>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-[#e8e7f2] bg-white p-5 shadow-[0_3px_12px_rgba(20,19,50,0.04)] text-center flex flex-col items-center justify-center min-h-[170px]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ecfdf5] text-[#059669] mb-2.5 shadow-sm">
+            <span className="material-symbols-outlined text-[24px]">
+              task_alt
+            </span>
+          </div>
+
+          <h3 className="text-[14px] font-extrabold text-[#1c1c45]">
+            No Active Quests
+          </h3>
+
+          <p className="mt-1 text-[11.5px] leading-relaxed text-[#686985] max-w-[240px]">
+            All current adventure quests are completed! Forge a new quest to continue your journey.
+          </p>
+
+          <button
+            type="button"
+            onClick={onForge || onContinue}
+            className="mt-3.5 flex h-8 px-4 items-center justify-center gap-1.5 rounded-full bg-[#5b4be2] text-[11.5px] font-extrabold text-white shadow-[0_3px_0_#4029ba] transition-all duration-150 hover:-translate-y-0.5 hover:bg-[#4d3dd4] active:translate-y-0"
+          >
+            <span className="material-symbols-outlined text-[15px]">
+              add_circle
+            </span>
+            <span>Forge New Quest</span>
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   const title = quest?.title || 'Explore New Frontiers';
   const description =
     quest?.description ||
@@ -649,10 +693,15 @@ export default function AdventurePage() {
 
   // 3. Dynamic Active Quest (top unfinished quest)
   const activeQuest = useMemo(() => {
+    if (!questList || questList.length === 0) return null;
     return (
-      questList.find((q) => (q.progressPct ?? q.progress ?? 0) < 100) ||
-      questList[0] ||
-      null
+      questList.find((q) => {
+        const isDone =
+          q.status === 'COMPLETED' ||
+          q.completed === true ||
+          (q.progressPct ?? q.progress ?? 0) >= 100;
+        return !isDone;
+      }) || null
     );
   }, [questList]);
 
@@ -791,6 +840,7 @@ export default function AdventurePage() {
             quest={activeQuest}
             onContinue={() => navigate(activeQuest ? `/quests/${activeQuest.id}` : '/quests')}
             onViewDetails={() => navigate(activeQuest ? `/quests/${activeQuest.id}` : '/quests')}
+            onForge={() => navigate('/quests')}
           />
 
           {/* 4. Adventure Quote */}
