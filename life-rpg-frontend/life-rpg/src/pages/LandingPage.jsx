@@ -137,7 +137,7 @@ export default function LandingPage() {
     if (isLoggedIn) {
       navigate('/adventure');
     } else {
-      navigate('/register');
+      navigate('/login');
     }
   };
 
