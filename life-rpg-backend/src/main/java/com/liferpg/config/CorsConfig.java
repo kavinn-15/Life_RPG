@@ -21,7 +21,12 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(frontendUrl, "http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173")
+                .allowedOrigins(
+                        frontendUrl,
+                        "https://life-4oh3onw47-powerhouse14.vercel.app",
+                        "http://localhost:5173",
+                        "http://localhost:3000",
+                        "http://127.0.0.1:5173")
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
@@ -30,15 +35,34 @@ public class CorsConfig implements WebMvcConfigurer {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(frontendUrl, "http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
+
+        configuration.setAllowedOrigins(List.of(
+                frontendUrl,
+                "https://life-4oh3onw47-powerhouse14.vercel.app",
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "http://127.0.0.1:5173"));
+
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"));
+
+        configuration.setAllowedHeaders(List.of("*"));
+
         configuration.setAllowCredentials(true);
+
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 }
