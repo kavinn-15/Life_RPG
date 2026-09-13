@@ -52,7 +52,7 @@ replay_pid*
 *.trace.db
 *.sqlite
 *.db
-**/data/
+# **/data/
 
 # ==========================================
 # Environment Variables & Sensitive Configs
